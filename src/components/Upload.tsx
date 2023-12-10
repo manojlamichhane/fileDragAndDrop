@@ -3,11 +3,16 @@ import background from "./../assets/globalagriculture.jpg";
 import "./../App.css";
 import axios from "axios";
 
+type imageProp = {
+  name: string;
+  url: string;
+};
+
 const Upload = () => {
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<imageProp>();
   const [file, setFile] = useState({});
   const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLDivElement>();
   const [isUploading, setIsUploading] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
 
@@ -18,7 +23,7 @@ const Upload = () => {
   };
   const uploadFile = async () => {
     setIsUploading(true);
-    const response = await axios.post(
+    await axios.post(
       "https://agrovision.azurewebsites.net/uploadfile",
       { file: file },
       {
@@ -27,11 +32,10 @@ const Upload = () => {
         },
       }
     );
-    console.log(response);
     setIsUploading(false);
     setIsUploaded(true);
   };
-  const onFileSelect = (event: MouseEvent) => {
+  const onFileSelect = (event: Event) => {
     const target = event.target as HTMLInputElement;
     if (target.files?.length) {
       setFile(target.files[0]);
@@ -45,7 +49,9 @@ const Upload = () => {
   const onDragOver = (event: DragEvent) => {
     event.preventDefault();
     setIsDragging(true);
-    event.dataTransfer.dropEffect = "copy";
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = "copy";
+    }
   };
   const onDragLeave = (event: DragEvent) => {
     event.preventDefault();
@@ -54,7 +60,7 @@ const Upload = () => {
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
     setIsDragging(false);
-    if (event.dataTransfer.files?.length) {
+    if (event.dataTransfer && event.dataTransfer.files?.length) {
       setFile(event.dataTransfer.files[0]);
       setImage({
         name: event.dataTransfer.files[0].name,
@@ -63,7 +69,7 @@ const Upload = () => {
     }
   };
   const deleteImage = () => {
-    setImage(null);
+    setImage({ name: "", url: "" });
   };
 
   return (
